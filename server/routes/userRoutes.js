@@ -8,4 +8,5 @@ const userRouter= express.Router()
 
 userRouter.get("/", protect,getUserData);
 userRouter.post("/recentlySearchedCities", protect, storeRecentlySearchedCities);
+userRouter.post("/store-recent-search", protect, storeRecentlySearchedCities);
 export default userRouter

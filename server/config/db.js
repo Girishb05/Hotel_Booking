@@ -24,6 +24,7 @@ const connectDB = async () => {
     console.log("🏓 MongoDB ping successful", pingResult);
   } catch (error) {
     console.error("MongoDB connection error:", error.message);
+    throw error;
   }
 };
 

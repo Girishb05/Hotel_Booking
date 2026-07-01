@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
 
-    recentlySearchedHotels: {
+    recentlySearchedCities: {
       type: [String],
       default: [],
     },

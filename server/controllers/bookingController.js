@@ -1,8 +1,7 @@
 import Booking from "../models/Booking.js";
 import Room from "../models/Room.js";
 import Hotel from "../models/Hotel.js";
-
-
+import transporter from "../config/nodemailer.js";
 
 // function to check room availability
 const checkRoomAvailability = async ({
@@ -29,7 +28,16 @@ const checkRoomAvailability = async ({
 
 export const checkAvailability = async (req, res) => {
     try {
-        const { room, checkInDate, checkOutDate } = req.body;
+        const room = req.body.room || req.body.roomId;
+        const checkInDate = req.body.checkInDate || req.body.checkIn;
+        const checkOutDate = req.body.checkOutDate || req.body.checkOut;
+
+        if (!room || !checkInDate || !checkOutDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing room or dates for availability check",
+            });
+        }
 
         const isAvailable = await checkRoomAvailability({
             checkInDate,
@@ -39,7 +47,7 @@ export const checkAvailability = async (req, res) => {
 
         res.json({ success: true, isAvailable });
     } catch (err) {
-        res.json({ success: false, message: err.message });
+        res.status(500).json({ success: false, message: err.message });
     }
 };
 
@@ -48,8 +56,18 @@ export const checkAvailability = async (req, res) => {
 
 export const createBooking = async (req, res) => {
     try {
-        const { room, checkInDate, checkOutDate, guests } = req.body;
+        const room = req.body.room || req.body.roomId;
+        const checkInDate = req.body.checkInDate || req.body.checkIn;
+        const checkOutDate = req.body.checkOutDate || req.body.checkOut;
+        const guests = req.body.guests;
         const user = req.user._id;
+
+        if (!room || !checkInDate || !checkOutDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing booking details",
+            });
+        }
 
         // Before booking check if the room is available
         const isAvailable = await checkRoomAvailability({
@@ -67,6 +85,13 @@ export const createBooking = async (req, res) => {
 
         // Get total price of the booking
         const roomData = await Room.findById(room).populate("hotel");
+
+        if (!roomData) {
+            return res.status(404).json({
+                success: false,
+                message: "Room not found",
+            });
+        }
 
         let totalPrice = roomData.pricePerNight;
 
@@ -98,7 +123,7 @@ export const createBooking = async (req, res) => {
             to: req.user.email,
             subject: "Hotel Booking Details",
             html: `
-                <p>Dear ${req.user.name},</p>
+                <p>Dear ${req.user.username || req.user.email},</p>
                 <p>Thank you for booking with us! Here are your booking details:</p>
                 <ul>
                     <li><strong>Booking Id:</strong> ${booking._id}</li>
@@ -114,8 +139,12 @@ export const createBooking = async (req, res) => {
             `,
         };
 
-        if (transporter) {
-            await transporter.sendMail(mailOptions);
+        if (transporter && process.env.SMTP_USERNAME && process.env.SMTP_PASSWORD) {
+            try {
+                await transporter.sendMail(mailOptions);
+            } catch (emailError) {
+                console.error("Booking email failed:", emailError.message);
+            }
         }
 
 
@@ -127,7 +156,7 @@ export const createBooking = async (req, res) => {
     } catch (err) {
         console.error(err);
 
-        res.json({
+        res.status(500).json({
             success: false,
             message: "Failed to create booking",
             error: err.message,

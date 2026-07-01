@@ -14,7 +14,7 @@ const [destination, setDestination] = useState("");
 
     // call api to save recent searched city
     await axios.post(
-      '/api/user/store-recent-search',
+      '/api/user/recentlySearchedCities',
       { recentSearchedCity: destination },
       { headers: { Authorization: `Bearer ${await getToken()}` } }
     );
