@@ -1,9 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Title from "../../components/Title";
-import { assets, dashboardDummyData } from "../../assets/assets";
+import { assets } from "../../assets/assets";
+import { useAppContext } from "../../../context/AppContext";
+import toast from "react-hot-toast";
 
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] = useState(dashboardDummyData);
+
+  const { currency, user, getToken, axios } = useAppContext();
+  const [dashboardData, setDashboardData] = useState({
+    bookings:[],
+    totalBookings:0,
+    totalRevenue:0,
+  });
+
+  const fetchDashboardData = async () => {
+    try {
+      const { data } = await axios.get('/api/bookings/hotel', {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+
+      if (data.success) {
+        setDashboardData(data.dashboard || {
+          bookings: [],
+          totalBookings: 0,
+          totalRevenue: 0,
+        });
+      } else {
+        toast.error(data.message || 'Unable to load dashboard data');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Unable to load dashboard data');
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
   return (
     <div>
@@ -15,7 +49,7 @@ const Dashboard = () => {
 
       <div className="flex flex-wrap gap-6 my-8">
         {/* Total Revenue */}
-        <div className="flex items-center gap-4 bg-white shadow-md rounded-xl p-5 min-w-[250px]">
+        <div className="flex items-center gap-4 bg-white shadow-md rounded-xl p-5" style={{ minWidth: "250px" }}>
           <img
             src={assets.totalRevenueIcon}
             alt="Revenue"
@@ -34,7 +68,7 @@ const Dashboard = () => {
         </div>
 
         {/* Total Bookings */}
-        <div className="flex items-center gap-4 bg-whites rounded-xl p-5 min-w-[250px]">
+        <div className="flex items-center gap-4 bg-white rounded-xl p-5" style={{ minWidth: "250px" }}>
           <img
             src={assets.totalBookingIcon}
             alt="Bookings"
@@ -80,36 +114,44 @@ const Dashboard = () => {
     </thead>
 
     <tbody>
-      {dashboardData.bookings.map((booking) => (
-        <tr
-          key={booking._id}
-          className="border-b hover:bg-gray-50"
-        >
-          <td className="px-6 py-4">
-            {booking.user.username}
-          </td>
+      {dashboardData.bookings?.length ? (
+        dashboardData.bookings.map((booking) => (
+          <tr
+            key={booking._id}
+            className="border-b hover:bg-gray-50"
+          >
+            <td className="px-6 py-4">
+              {booking.user?.username || "-"}
+            </td>
 
-          <td className="px-6 py-4">
-            {booking.room.roomType}
-          </td>
+            <td className="px-6 py-4">
+              {booking.room?.roomType || "-"}
+            </td>
 
-          <td className="px-6 py-4">
-            ${booking.totalPrice}
-          </td>
+            <td className="px-6 py-4">
+              ${booking.totalPrice || 0}
+            </td>
 
-          <td className="px-6 py-4">
-            <button 
-              className={`px-3 py-1 rounded-full text-sm ${
-                booking.isPaid
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {booking.isPaid ? "Paid" : "Pending"}
-            </button>
+            <td className="px-6 py-4">
+              <button 
+                className={`px-3 py-1 rounded-full text-sm ${
+                  booking.isPaid
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {booking.isPaid ? "Paid" : "Pending"}
+              </button>
+            </td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td className="px-6 py-4" colSpan={4}>
+            No bookings available.
           </td>
         </tr>
-      ))}
+      )}
     </tbody>
   </table>
 </div>

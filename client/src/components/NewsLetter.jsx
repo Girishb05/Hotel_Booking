@@ -25,7 +25,7 @@ const NewsLetter = () => {
         <button className="flex items-center justify-center gap-2 group bg-black-600 hover:bg-white-700 px-4 text-white md:px-7 py-2.5 rounded transition-all">
           Subscribe
           <img
-            src={assets.arrowIcon}s
+            src={assets.arrowIcon}
             alt="Arrow"
             className="w-4 h-4 invert group-hover:translate-x-1 transition-all"
           />

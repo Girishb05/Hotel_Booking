@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import logo from "../assets/logo.svg";
 import search from "../assets/searchIcon.svg";
 import menuIcon from "../assets/menuIcon.svg";
 import closeIcon from "../assets/closeIcon.svg";
-import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
+import { useClerk, UserButton } from "@clerk/clerk-react";
+import { useAppContext } from "../../context/AppContext";
 
 const Navbar = () => {
   const navLinks = [
@@ -19,9 +20,9 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const { openSignIn } = useClerk();
-  const { user } = useUser();
-  const navigate = useNavigate();
+  
   const location = useLocation();
+  const {user,navigate,isOwner,setShowHotelReg}=useAppContext()
 
   useEffect(() => {
     setIsScrolled(location.pathname !== "/");
@@ -36,6 +37,16 @@ const Navbar = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [location.pathname]);
+
+  const handleHotelAction = () => {
+    if (isOwner) {
+      navigate("/owner");
+      return;
+    }
+
+    setShowHotelReg(true);
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav
@@ -73,16 +84,19 @@ const Navbar = () => {
           </Link>
         ))}
 
-        <button
+
+
+       {user && ( <button
           className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all ${
             isScrolled
               ? "text-black border-black"
               : "text-white border-white"
           }`}
-          onClick={() => navigate("/owner")}
+          onClick={handleHotelAction}
         >
-          Dashboard
-        </button>
+          {isOwner?  "Dashboard" : "List Your Hotel"}
+        </button>)}
+
       </div>
 
       {/* Desktop Right */}
@@ -167,12 +181,9 @@ const Navbar = () => {
         {user && (
           <button
             className="border px-4 py-1 rounded-full"
-            onClick={() => {
-              navigate("/owner");
-              setIsMenuOpen(false);
-            }}
+            onClick={handleHotelAction}
           >
-            Dashboard
+            {isOwner ? "Dashboard" : "List Your Hotel"}
           </button>
         )}
 

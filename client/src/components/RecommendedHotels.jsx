@@ -1,13 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import HotelCard from "./HotelCard";
 import Title from "./Title";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 
-const FeaturedDestination = () => {
-  const {rooms,navigate}=useAppContext()
+const RecommendedHotel = () => {
+  const { rooms, searchedCities } = useAppContext();
+  const navigate = useNavigate();
+  const [recommended, setRecommended] = useState([]);
+
+  const filterHotels = () => {
+    const filteredHotels = rooms
+      .slice()
+      .filter((room) => searchedCities?.includes(room.hotel?.city));
+    setRecommended(filteredHotels);
+  };
+
+  useEffect(() => {
+    filterHotels();
+  }, [rooms, searchedCities]);
   
-  return rooms.length > 0 && (
+  if (!recommended || recommended.length === 0) {
+    return null;
+  }
+
+  return (
     <div className="px-6 py-10">
       <h1 className="text-3xl font-bold text-center">
         Featured Destinations
@@ -20,7 +37,7 @@ const FeaturedDestination = () => {
   align="center"
   font="text-3xl"
 />   <div className="flex flex-wrap justify-center gap-6 mt-8">
-        {rooms?.slice(0, 4).map((room, index) => (
+        {recommended?.slice(0, 4).map((room, index) => (
           <HotelCard
             key={room._id}
             room={room}
@@ -41,4 +58,4 @@ const FeaturedDestination = () => {
   );
 };
 
-export default FeaturedDestination;
+export default RecommendedHotel;

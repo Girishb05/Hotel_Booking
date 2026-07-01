@@ -13,42 +13,39 @@ const clerkWebhooks = async (req, res) => {
       "svix-signature": req.headers["svix-signature"],
     };
 
-    await whook.verify(
-      JSON.stringify(req.body),
-      headers
-    );
+    const payload = req.rawBody || JSON.stringify(req.body)
+    await whook.verify(payload, headers)
 
-    const { type, data } = req.body;
+    const { type, data } = req.body
+    console.log("Clerk webhook event:", type, data)
 
     const userData = {
       _id: data.id,
-      username:
-        data.first_name + " " + data.last_name,
-      image: data.image_url,
+      username: [data.first_name, data.last_name].filter(Boolean).join(" ").trim(),
+      image: data.image_url || "",
       email:
-        data.email_addresses[0].email_address,
-    };
+        data.email_addresses?.[0]?.email_address || data.primary_email_address || "",
+    }
 
     switch (type) {
       case "user.created":
-        await User.create(userData);
-        break;
+        await User.create(userData)
+        break
 
       case "user.updated":
-        await User.findByIdAndUpdate(
-          data.id,
-          userData
-        );
-        break;
+        await User.findByIdAndUpdate(data.id, userData, {
+          new: true,
+          runValidators: true,
+        })
+        break
 
       case "user.deleted":
-        await User.findByIdAndDelete(
-          data.id
-        );
-        break;
+        await User.findByIdAndDelete(data.id)
+        break
 
       default:
-        break;
+        console.log(`Unhandled Clerk webhook event type: ${type}`)
+        break
     }
 
     res.json({
@@ -57,12 +54,13 @@ const clerkWebhooks = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error.message);
+    console.error("Webhook error:", error)
 
-    res.json({
+    res.status(400).json({
       success: false,
       message: error.message,
-    });
+      error: error.stack,
+    })
   }
 };
 
