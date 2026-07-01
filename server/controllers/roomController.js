@@ -24,9 +24,17 @@ export const createRoom = async (req, res) => {
       })
     }
 
-    const uploadedImages = req.files.map(async (file) => {
-      const response = await cloudinary.uploader.upload(file.path)
-      return response.secure_url
+    const uploadedImages = req.files.map((file) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image" },
+          (error, result) => {
+            if (error) reject(error)
+            else resolve(result.secure_url)
+          }
+        )
+        stream.end(file.buffer)
+      })
     })
 
     // wait for all images to be uploaded and get their URLs

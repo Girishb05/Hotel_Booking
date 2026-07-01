@@ -14,7 +14,7 @@
 // }
 
 
-import User from "../models/user.js";
+import User from "../models/User.js";
 import { getAuth } from "@clerk/express";
 import { clerkClient } from "@clerk/express";
 

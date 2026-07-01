@@ -1,6 +1,6 @@
 import multer from "multer";
 
-const upload = multer({
-  storage: multer.diskStorage({})});
+// Use memoryStorage — Vercel has a read-only filesystem, diskStorage won't work
+const upload = multer({ storage: multer.memoryStorage() });
 
 export default upload;
