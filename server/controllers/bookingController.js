@@ -93,6 +93,13 @@ export const createBooking = async (req, res) => {
             });
         }
 
+        if (!roomData.hotel) {
+            return res.status(404).json({
+                success: false,
+                message: "The hotel associated with this room no longer exists.",
+            });
+        }
+
         let totalPrice = roomData.pricePerNight;
 
         // Calculate total price based on number of nights
