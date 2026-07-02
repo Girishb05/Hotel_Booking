@@ -87,14 +87,14 @@ export const createBooking = async (req, res) => {
         const roomData = await Room.findById(room).populate("hotel");
 
         if (!roomData) {
-            return res.status(404).json({
+            return res.json({
                 success: false,
                 message: "Room not found",
             });
         }
 
         if (!roomData.hotel) {
-            return res.status(404).json({
+            return res.json({
                 success: false,
                 message: "The hotel associated with this room no longer exists.",
             });

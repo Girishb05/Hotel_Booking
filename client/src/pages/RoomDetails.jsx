@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { assets, facilityIcons, roomCommonData } from "../assets/assets";
 import StarRating from "../components/StarRating";
@@ -110,7 +110,7 @@ const RoomDetails = () => {
     } catch (error) {
       setAvailabilityChecked(true);
       setIsAvailable(false);
-      toast.error(error.message || "Unable to check availability");
+      toast.error(error.response?.data?.message || error.message || "Unable to check availability");
     } finally {
       setIsChecking(false);
     }
@@ -152,7 +152,7 @@ const RoomDetails = () => {
         toast.error(data.message || "Booking failed");
       }
     } catch (error) {
-      toast.error(error.message || "Booking failed");
+      toast.error(error.response?.data?.message || error.message || "Booking failed");
     } finally {
       setIsBooking(false);
     }
