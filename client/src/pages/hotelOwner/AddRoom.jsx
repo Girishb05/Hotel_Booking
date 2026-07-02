@@ -4,6 +4,47 @@ import { assets } from "../../assets/assets";
 import { useAppContext } from "../../../context/AppContext";
 import toast from "react-hot-toast";
 
+const compressImage = (file, maxWidth = 1000, quality = 0.7) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            resolve(
+              new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              })
+            );
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+    };
+  });
+};
+
+
 const AddRoom = () => {
 
   const {axios,getToken}=useAppContext(
@@ -51,11 +92,13 @@ const AddRoom = () => {
 
       formData.append('amenities',JSON.stringify(amenities))
 
-      //Adding images to FormData 
-
-      Object.keys(images).forEach((key)=>{
-        images[key] && formData.append('images',images[key])
-      })
+      //Adding images to FormData (compressed)
+      for (const key of Object.keys(images)) {
+        if (images[key]) {
+          const compressed = await compressImage(images[key]);
+          formData.append('images', compressed);
+        }
+      }
 
       const {data}=await axios.post('/api/rooms/',formData,{headers:{Authorization:`Bearer ${await getToken()}`}})
       
@@ -80,7 +123,7 @@ const AddRoom = () => {
 
     }
     catch(error){
-      toast.error(error.message)
+      toast.error(error.response?.data?.message || error.message)
     }
     finally{
       setLoading(false);

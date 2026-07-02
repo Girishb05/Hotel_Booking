@@ -123,7 +123,7 @@ const AllRooms = () => {
 
   if(!destination) return true
 
-  return room.hotel.city.toLowerCase().includes(destination.toLowerCase())
+  return room.hotel?.city?.toLowerCase().includes(destination.toLowerCase()) || false;
  }
 
  //Filter and sort rooms based on the selected filters and sort option 
@@ -175,7 +175,7 @@ const clearFilters = () => {
 
                 <div className="p-5">
                   <p className="text-sm text-gray-500">
-                    {room.hotel.city}
+                    {room.hotel?.city || "Unknown City"}
                   </p>
 
                   <h2
@@ -185,7 +185,7 @@ const clearFilters = () => {
                       window.scrollTo(0, 0);
                     }}
                   >
-                    {room.hotel.name}
+                    {room.hotel?.name || "Hotel"}
                   </h2>
 
                   <div className="flex items-center gap-2 mt-3">
@@ -202,7 +202,7 @@ const clearFilters = () => {
                       className="w-4 h-4"
                     />
                     <span className="text-sm text-gray-600">
-                      {room.hotel.address}
+                      {room.hotel?.address || "Address not provided"}
                     </span>
                   </div>
 

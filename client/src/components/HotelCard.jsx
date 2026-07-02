@@ -25,7 +25,7 @@ const HotelCard = ({ room, index }) => {
       <div className="p-5 pt-5">
         <div className="flex justify-between items-center">
           <p className="font-playfair text-xl font-medium text-gray-800">
-            {room.hotel.name}
+            {room.hotel?.name || "Hotel"}
           </p>
 
           <div className="flex items-center gap-1">
@@ -45,7 +45,7 @@ const HotelCard = ({ room, index }) => {
             className="w-4 h-4"
           />
           <span className="text-gray-600 text-sm">
-            {room.hotel.address}
+            {room.hotel?.address || "Address unavailable"}
           </span>
         </div>
 

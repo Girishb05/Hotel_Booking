@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Title from "../components/Title";
 import { useAppContext } from "../../context/AppContext";
+import { assets } from "../assets/assets";
 import toast from "react-hot-toast";
 
 const MyBookings = () => {
@@ -57,18 +58,18 @@ const MyBookings = () => {
     {/* Hotel Image + Details */}
     <div className="w-full md:w-1/3 flex gap-4">
       <img
-        src={booking.room.images[0]}
-        alt={booking.hotel.name}
+        src={booking.room?.images?.[0] || assets.uploadArea}
+        alt={booking.hotel?.name || "Hotel"}
         className="w-24 h-24 rounded-lg object-cover"
       />
 
       <div>
         <p className="font-semibold text-lg">
-          {booking.hotel.name}
+          {booking.hotel?.name || "Deleted Hotel"}
         </p>
 
         <p className="text-sm text-gray-500">
-          {booking.room.roomType}
+          {booking.room?.roomType || "Room Deleted"}
         </p>
 
         <div className="flex items-center gap-1 mt-1">
@@ -78,7 +79,7 @@ const MyBookings = () => {
             className="w-4 h-4"
           />
           <span className="text-sm text-gray-500">
-            {booking.hotel.address}
+            {booking.hotel?.address || "Address Unavailable"}
           </span>
         </div>
       </div>
@@ -87,11 +88,11 @@ const MyBookings = () => {
     {/* Date & Guests */}
     <div className="w-full md:w-1/3">
       <p className="font-medium">
-        Check In: {booking.checkInDate}
+        Check In: {booking.checkInDate ? new Date(booking.checkInDate).toLocaleDateString() : "N/A"}
       </p>
 
       <p className="font-medium">
-        Check Out: {booking.checkOutDate}
+        Check Out: {booking.checkOutDate ? new Date(booking.checkOutDate).toLocaleDateString() : "N/A"}
       </p>
 
       <p className="text-gray-600 mt-1">
